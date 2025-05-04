@@ -1,0 +1,27 @@
+body {
+    padding-top: 56px;
+}
+
+.jumbotron {
+    background-color: #f8f9fa;
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+    border-radius: .3rem;
+}
+
+.card {
+    transition: transform .2s;
+}
+
+.card:hover {
+    transform: scale(1.02);
+}
+
+.product-image {
+    max-height: 300px;
+    object-fit: contain;
+}
+
+.table img {
+    max-width: 50px;
+}

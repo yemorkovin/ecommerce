@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Заказ #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'profile' %}">Личный кабинет</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Заказ #{{ order.id }}</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="mb-0">Заказ #{{ order.id }}</h1>
+                <span class="badge bg-{% if order.paid %}success{% else %}warning{% endif %} fs-6">
+                    {% if order.paid %}Оплачен{% else %}Ожидает оплаты{% endif %}
+                </span>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 mt-3">
+                <div class="text-muted">
+                    <i class="bi bi-calendar me-1"></i>
+                    {{ order.created_at|date:"d.m.Y H:i" }}
+                </div>
+                <div class="text-muted">
+                    <i class="bi bi-credit-card me-1"></i>
+                    {{ order.get_payment_method_display }}
+                </div>
+                <div class="text-muted">
+                    <i class="bi bi-truck me-1"></i>
+                    {{ order.get_delivery_method_display }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Состав заказа</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 60px">Фото</th>
+                                    <th>Товар</th>
+                                    <th class="text-end">Цена</th>
+                                    <th class="text-end">Кол-во</th>
+                                    <th class="text-end">Сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td>
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                             class="img-fluid rounded" style="max-height: 50px">
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'product_detail' item.product.slug %}" class="text-decoration-none">
+                                            {{ item.product.name }}
+                                        </a>
+                                    </td>
+                                    <td class="text-end">{{ item.price }} ₽</td>
+                                    <td class="text-end">{{ item.quantity }}</td>
+                                    <td class="text-end">{{ item.get_cost }} ₽</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-group-divider">
+                                <tr>
+                                    <td colspan="4" class="text-end"><strong>Товары:</strong></td>
+                                    <td class="text-end">{{ order.get_total_cost }} ₽</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-end"><strong>Доставка:</strong></td>
+                                    <td class="text-end">{{ order.delivery_cost }} ₽</td>
+                                </tr>
+                                <tr class="table-active">
+                                    <td colspan="4" class="text-end"><h5 class="mb-0">Итого:</h5></td>
+                                    <td class="text-end"><h5 class="mb-0">{{ order.get_total_cost_with_delivery }} ₽</h5></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {% if not order.paid %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                <a href="{% url 'payment' order.id %}" class="btn btn-primary">
+                    <i class="bi bi-credit-card me-1"></i> Оплатить заказ
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Информация о заказе</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Получатель</h6>
+                    <p class="mb-1">{{ order.first_name }} {{ order.last_name }}</p>
+                    <p class="mb-1">{{ order.phone }}</p>
+                    <p class="mb-4">{{ order.email }}</p>
+
+                    <h6 class="mb-3">Адрес доставки</h6>
+                    <p>{{ order.address|linebreaksbr }}</p>
+
+                    {% if order.comment %}
+                    <h6 class="mb-3">Комментарий</h6>
+                    <p class="text-muted">{{ order.comment }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Статус заказа</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item {% if order.status >= 1 %}active{% endif %}">
+                            <div class="timeline-icon">
+                                <i class="bi bi-cart"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <p class="mb-1">Заказ оформлен</p>
+                                <small class="text-muted">{{ order.created_at|date:"d.m.Y H:i" }}</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item {% if order.status >= 2 %}active{% endif %}">
+                            <div class="timeline-icon">
+                                <i class="bi bi-credit-card"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <p class="mb-1">Оплата</p>
+                                <small class="text-muted">
+                                    {% if order.paid %}
+                                    Оплачен {{ order.payment_date|date:"d.m.Y H:i" }}
+                                    {% else %}
+                                    Ожидает оплаты
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="timeline-item {% if order.status >= 3 %}active{% endif %}">
+                            <div class="timeline-icon">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <p class="mb-1">Сборка заказа</p>
+                                <small class="text-muted">
+                                    {% if order.status >= 3 %}
+                                    {{ order.packing_date|date:"d.m.Y H:i" }}
+                                    {% else %}
+                                    В обработке
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="timeline-item {% if order.status >= 4 %}active{% endif %}">
+                            <div class="timeline-icon">
+                                <i class="bi bi-truck"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <p class="mb-1">Доставка</p>
+                                <small class="text-muted">
+                                    {% if order.status >= 4 %}
+                                    В пути
+                                    {% else %}
+                                    Ожидает отправки
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="timeline-item {% if order.status >= 5 %}active{% endif %}">
+                            <div class="timeline-icon">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <p class="mb-1">Завершен</p>
+                                <small class="text-muted">
+                                    {% if order.status >= 5 %}
+                                    Доставлен {{ order.completion_date|date:"d.m.Y H:i" }}
+                                    {% else %}
+                                    В процессе
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 40px;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    .timeline-icon {
+        position: absolute;
+        left: -40px;
+        top: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .timeline-item.active .timeline-icon {
+        background: #0d6efd;
+        color: white;
+    }
+    .timeline-content {
+        padding-left: 10px;
+    }
+    .timeline-item:not(:last-child):after {
+        content: '';
+        position: absolute;
+        left: -25px;
+        top: 30px;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+    }
+    .timeline-item.active:not(:last-child):after {
+        background: #0d6efd;
+    }
+</style>
+{% endblock %}

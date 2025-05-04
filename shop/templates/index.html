@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Добро пожаловать в наш магазин!</h1>
+    <p class="lead">Лучшие товары по отличным ценам</p>
+    <hr class="my-4">
+    <p>Начните покупки прямо сейчас</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'catalog' %}" role="button">Перейти в каталог</a>
+</div>
+
+<div class="row">
+    <h2 class="mb-4">Популярные товары</h2>
+    {% for product in popular_products %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.description|truncatewords:15 }}</p>
+                <p class="text-muted">{{ product.price }} руб.</p>
+                <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline-primary">Подробнее</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

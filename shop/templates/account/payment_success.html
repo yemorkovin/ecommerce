@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Оплата прошла успешно{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="#28a745" class="bi bi-check-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                        </svg>
+                    </div>
+                    <h1 class="mb-4">Оплата прошла успешно!</h1>
+                    <p class="lead mb-4">Ваш заказ #{{ order.id }} был успешно оплачен.</p>
+                    <p>Мы отправили вам письмо с деталями заказа на {{ order.email }}.</p>
+                    <div class="mt-5">
+                        <a href="{% url 'order_detail' order.id %}" class="btn btn-primary me-2">Подробности заказа</a>
+                        <a href="{% url 'catalog' %}" class="btn btn-outline-secondary">Вернуться в магазин</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
