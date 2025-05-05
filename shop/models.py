@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -26,6 +27,8 @@ class Product(models.Model):
         return self.name
 
 
+
+
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -37,6 +40,10 @@ class Cart(models.Model):
 
     def get_total_price(self):
         """Возвращает общую стоимость позиции (цена * количество)"""
+        return self.product.price * self.quantity
+
+    @property
+    def get_cost(self):
         return self.product.price * self.quantity
 
 
@@ -58,3 +65,22 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField('Текст отзыва')
+    rating = models.PositiveIntegerField(
+        'Оценка',
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+
+    def __str__(self):
+        return f'Отзыв от {self.user.username} на {self.product.name}'
