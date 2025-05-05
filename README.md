@@ -16,6 +16,11 @@ cd ecommerce
 docker-compose build 
 docker-compose up 
 ```
+
+3. Запуск фейковых данных
+```
+python manage.py generate_dummy_data --products 100
+```
 ## Структура проекта
 
 - Главная страница — /  
