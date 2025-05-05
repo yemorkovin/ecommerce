@@ -1,30 +1,215 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Главная страница{% endblock %}
 
 {% block content %}
-<div class="jumbotron">
-    <h1 class="display-4">Добро пожаловать в наш магазин!</h1>
-    <p class="lead">Лучшие товары по отличным ценам</p>
-    <hr class="my-4">
-    <p>Начните покупки прямо сейчас</p>
-    <a class="btn btn-primary btn-lg" href="{% url 'catalog' %}" role="button">Перейти в каталог</a>
-</div>
-
-<div class="row">
-    <h2 class="mb-4">Популярные товары</h2>
-    {% for product in popular_products %}
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-            <div class="card-body">
-                <h5 class="card-title">{{ product.name }}</h5>
-                <p class="card-text">{{ product.description|truncatewords:15 }}</p>
-                <p class="text-muted">{{ product.price }} руб.</p>
-                <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline-primary">Подробнее</a>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+<!-- Главный слайдер -->
+<div id="mainCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="2"></button>
+    </div>
+    <div class="carousel-inner rounded-3">
+        <div class="carousel-item active">
+            <img src="{% static 'images/slide1.jpg' %}" class="d-block w-100" alt="Акция недели">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Акция недели</h2>
+                <p>Скидки до 30% на топовые товары</p>
+                <a href="{% url 'catalog' %}?discount=true" class="btn btn-primary btn-lg">Смотреть акции</a>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="{% static 'images/slide2.jpg' %}" class="d-block w-100" alt="Новинки">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Новинки сезона</h2>
+                <p>Самые свежие поступления в нашем магазине</p>
+                <a href="{% url 'catalog' %}?new=true" class="btn btn-primary btn-lg">Смотреть новинки</a>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="{% static 'images/slide3.jpg' %}" class="d-block w-100" alt="Бесплатная доставка">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Бесплатная доставка</h2>
+                <p>При заказе от 5000 руб. - доставка бесплатно</p>
+                <a href="{% url 'catalog' %}" class="btn btn-primary btn-lg">Перейти в каталог</a>
             </div>
         </div>
     </div>
-    {% endfor %}
+    <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
 </div>
+
+<!-- Категории товаров -->
+<div class="container mb-5">
+    <h2 class="text-center mb-4">Популярные категории</h2>
+    <div class="row g-4">
+        {% for category in popular_categories %}
+        <div class="col-md-4">
+            <div class="category-card card h-100 border-0 shadow-sm">
+                <a href="{% url 'catalog' %}?category={{ category.slug }}">
+                    <img src="{{ category.image.url }}" class="card-img-top category-img" alt="{{ category.name }}">
+                </a>
+                <div class="card-body text-center">
+                    <h5 class="card-title">
+                        <a href="{% url 'catalog' %}?category={{ category.slug }}" class="text-decoration-none text-dark">
+                            {{ category.name }}
+                        </a>
+                    </h5>
+                    <a href="{% url 'catalog' %}?category={{ category.slug }}" class="btn btn-outline-primary">Смотреть товары</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Хиты продаж -->
+<div class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Хиты продаж</h2>
+        <div class="row g-4">
+            {% for product in bestsellers %}
+            <div class="col-lg-3 col-md-6">
+                <div class="card h-100 product-card">
+                    {% if product.discount %}
+                    <span class="badge bg-danger position-absolute top-0 end-0 m-2">-{{ product.discount }}%</span>
+                    {% endif %}
+                    <a href="{% url 'product_detail' product.slug %}">
+                        <img src="{{ product.image.url }}" class="card-img-top p-3" alt="{{ product.name }}">
+                    </a>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'product_detail' product.slug %}" class="text-decoration-none text-dark">
+                                {{ product.name|truncatechars:30 }}
+                            </a>
+                        </h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            {% if product.discount %}
+                            <div>
+                                <span class="text-danger fs-5 fw-bold">{{ product.get_discounted_price }} ₽</span>
+                                <span class="text-decoration-line-through text-muted ms-2">{{ product.price }} ₽</span>
+                            </div>
+                            {% else %}
+                            <span class="fs-5 fw-bold">{{ product.price }} ₽</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0">
+                        <form action="{% url 'add_to_cart' product.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-cart-plus"></i> В корзину
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'catalog' %}" class="btn btn-outline-primary btn-lg">Весь каталог</a>
+        </div>
+    </div>
+</div>
+
+<!-- Преимущества -->
+<div class="container my-5">
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="p-4 border rounded-3 h-100">
+                <i class="bi bi-truck fs-1 text-primary mb-3"></i>
+                <h3>Быстрая доставка</h3>
+                <p class="text-muted">Доставка по всей России от 1 дня</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 border rounded-3 h-100">
+                <i class="bi bi-shield-check fs-1 text-primary mb-3"></i>
+                <h3>Гарантия качества</h3>
+                <p class="text-muted">Все товары проходят проверку</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 border rounded-3 h-100">
+                <i class="bi bi-arrow-repeat fs-1 text-primary mb-3"></i>
+                <h3>Легкий возврат</h3>
+                <p class="text-muted">Возврат в течение 14 дней</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Стили для слайдера */
+    #mainCarousel {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .carousel-item {
+        height: 500px;
+        background-color: #f8f9fa;
+    }
+
+    .carousel-item img {
+        object-fit: cover;
+        height: 100%;
+        filter: brightness(0.7);
+    }
+
+    .carousel-caption {
+        bottom: 30%;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 2rem;
+        border-radius: 1rem;
+    }
+
+    /* Стили для карточек категорий */
+    .category-card {
+        transition: transform 0.3s;
+    }
+
+    .category-card:hover {
+        transform: translateY(-10px);
+    }
+
+    .category-img {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    /* Стили для карточек товаров */
+    .product-card {
+        transition: all 0.3s;
+        border: none;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .product-card:hover {
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-card img {
+        height: 200px;
+        object-fit: contain;
+    }
+</style>
+<script>
+    // Автопрокрутка слайдера каждые 5 секунд
+    document.addEventListener('DOMContentLoaded', function() {
+        var myCarousel = document.getElementById('mainCarousel');
+        var carousel = new bootstrap.Carousel(myCarousel, {
+            interval: 5000,
+            pause: 'hover'
+        });
+    });
+</script>
 {% endblock %}

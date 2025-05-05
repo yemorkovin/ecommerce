@@ -12,10 +12,22 @@ from .forms import FilterForm, UserRegistrationForm, CheckoutForm
 
 
 def home(request):
-    popular_products = Product.objects.filter(available=True).order_by('-created')[:6]
-    return render(request, 'index.html', {'popular_products': popular_products})
+    popular_categories = Category.objects.filter(is_popular=True)[:3]
+    bestsellers = Product.objects.filter(is_bestseller=True, available=True)[:8]
 
+    # Добавьте эти изображения в static/images/
+    # или используйте свои изображения для слайдера
+    slider_images = [
+        {'title': 'Акция недели', 'subtitle': 'Скидки до 30%', 'url': '?discount=true'},
+        {'title': 'Новинки сезона', 'subtitle': 'Свежие поступления', 'url': '?new=true'},
+        {'title': 'Бесплатная доставка', 'subtitle': 'При заказе от 5000 руб.', 'url': ''},
+    ]
 
+    return render(request, 'index.html', {
+        'popular_categories': popular_categories,
+        'bestsellers': bestsellers,
+        'slider_images': slider_images,
+    })
 class ProductListView(ListView):
     model = Product
     template_name = 'catalog.html'
